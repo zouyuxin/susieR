@@ -1,105 +1,113 @@
-#' @title Bayesian single-effect linear regression using z scores.
-#' @details Performs single-effect linear regression with z scores. That is, this function
-#' fits the regression model z = Rb + e, where e is N(0,Sigma), Sigma = residual_var * R + lambda I, and the
-#' b is a p vector of effects to be estimated.
-#' The assumption is that b has exactly one non-zero element, with all elements
-#' equally likely to be non-zero. The prior on the non-zero element is N(0,var=V).
-#' @details Performs sum of single-effect (susie) linear regression with z scores.
-#' The summary data required are the p by p correlation matrix R, the p vector z. The summary stats should come from the same individuals.
-#' This function fits the regression model z = sum_l Rb_l + e, where e is N(0,Sigma) and the
-#' sum_l b_l is a p vector of effects to be estimated.
-#' The assumption is that each b_l has exactly one non-zero element, with all elements
-#' equally likely to be non-zero. The prior on the non-zero element is N(0,var=prior_variance).
-#' @param z a p vector
-#' @param R a p by p symmetric and positive semidefinite correlation matrix.
-#' @param V the prior variance
-#' @param residual_variance the residual variance
-#' @param prior_weights a p vector of prior weights
-#' @param optimize_V boolean indicating whether to optimize V (by maximum likelihood)
-#' @return a list with elements: \cr
-#' \item{alpha}{vector of posterior inclusion probabilities. ie alpha[i] is posterior probability that
-#'  that b[i] is non-zero}
-#' \item{mu}{vector of posterior means (conditional on inclusion)}
-#' \item{mu2}{vector of posterior second moments (conditional on inclusion)}
-#' \item{lbf}{vector of log Bayes factors for each variable}
-#' \item{V}{the prior variance (after optimization, if optimize_V is TRUE)}
-#' \item{lbf_model}{(scalar) the loglikelihood for the total model minus the log-likelihood for the null model}
-#'
-#'
-single_effect_regression_rss = function(z,R,V=1,residual_variance = 1, prior_weights=NULL,optimize_V=c("none", "optim", "uniroot", "EM", "simple")){
+#' @rdname single_effect_regression
+#' 
+#' @param z A p-vector of z scores.
+#' 
+#' @param Sigma \code{residual_var*R + lambda*I}
+#' 
+#' @keywords internal
+#' 
+single_effect_regression_rss =
+  function (z, Sigma, V = 1, prior_weights = NULL,
+            optimize_V = c("none", "optim", "uniroot", "EM", "simple"),
+            check_null_threshold = 0) {
   p = length(z)
-  shat2 = residual_variance/attr(R, 'd')
+  shat2 = 1/attr(Sigma,"RjSinvRj")
   if (is.null(prior_weights))
-    prior_weights = rep(1/p, p)
+    prior_weights = rep(1/p,p)
 
-  if(optimize_V!="EM" && optimize_V!="none"){
-    V=optimize_prior_variance_rss(optimize_V, z, R, residual_variance,prior_weights, alpha=NULL, post_mean2=NULL,V_init=V)
-  }
+  if (optimize_V != "EM" && optimize_V != "none") 
+    V = optimize_prior_variance_rss(optimize_V,z,Sigma,prior_weights,
+                                    alpha = NULL,post_mean2 = NULL,V_init = V,
+                                    check_null_threshold=check_null_threshold)
 
-  lbf = sapply(1:p, function(j){
-    -0.5 * log(1+(V/shat2[j])) +
-      0.5 * (V/(1+(V/shat2[j]))) * (sum(attr(R,'RinvRj')[,j] * z)/residual_variance)^2
-  })
-  #log(bf) on each SNP
+  lbf = sapply(1:p, function(j)
+    -0.5 * log(1 + (V/shat2[j])) +
+     0.5 * (V/(1 + (V/shat2[j]))) * sum(attr(Sigma,"SinvRj")[,j] * z)^2
+  )
 
-  lbf[shat2==Inf] = 0 # deal with special case of infinite shat2 (eg happens if X does not vary)
+  # Deal with special case of infinite shat2 (e.g., happens if X does not
+  # vary).
+  lbf[is.infinite(shat2)] = 0 
 
+  # w is proportional to BF, but subtract max for numerical stability.
   maxlbf = max(lbf)
-  w = exp(lbf-maxlbf) # w is proportional to BF, but subtract max for numerical stability
+  w = exp(lbf-maxlbf)
+  
   # posterior prob on each SNP
   w_weighted = w * prior_weights
   weighted_sum_w = sum(w_weighted)
   alpha = w_weighted / weighted_sum_w
 
-  post_var = (1/shat2 + 1/V)^(-1) # posterior variance
-  post_mean = sapply(1:p, function(j) (post_var[j]/residual_variance) * sum(attr(R,'RinvRj')[,j]* z))
-  post_mean2 = post_var + post_mean^2 # second moment
-  lbf_model = maxlbf + log(weighted_sum_w) #analogue of loglik in the non-summary case
+  post_var = (attr(Sigma,"RjSinvRj") + 1/V)^(-1) # Posterior variance.
+  post_mean = sapply(1:p,function(j) (post_var[j]) *
+              sum(attr(Sigma,"SinvRj")[,j] * z))
+  post_mean2 = post_var + post_mean^2 # Second moment.
+  lbf_model = maxlbf + log(weighted_sum_w) # Analogue of loglik in the
+                                           # non-summary case.
 
-  if(optimize_V=="EM"){
-    print(prior_weights)
-    V=optimize_prior_variance_rss(optimize_V, z, R, residual_variance, prior_weights, alpha, post_mean2)
-  }
-
-  return(list(alpha=alpha,mu=post_mean,mu2 = post_mean2,lbf=lbf, V=V, lbf_model=lbf_model))
+  if (optimize_V=="EM") 
+    V = optimize_prior_variance_rss(optimize_V,z,Sigma,prior_weights,
+        alpha,post_mean2,check_null_threshold = check_null_threshold)
+  
+  return(list(alpha = alpha,mu = post_mean,mu2 = post_mean2,lbf = lbf,
+              V = V,lbf_model = lbf_model))
 }
 
-loglik_rss = function(V,z,R,residual_variance,prior_weights) {
+loglik_rss = function (V, z, Sigma, prior_weights) {
   p = length(z)
-  shat2 = residual_variance/attr(R, 'd')
+  shat2 = 1/attr(Sigma,"RjSinvRj")
 
-  lbf = sapply(1:p, function(j){
-    -0.5 * log(1+(V/shat2[j])) +
-      0.5 * (V/(1+(V/shat2[j]))) * (sum(attr(R,'RinvRj')[,j] * z)/residual_variance)^2
-  })
-  #log(bf) on each SNP
-
-  lbf[shat2==Inf] = 0 # deal with special case of infinite shat2 (eg happens if X does not vary)
+  # log(bf) for each SNP.
+  lbf = sapply(1:p,function (j)
+    -0.5 * log(1 + (V/shat2[j])) +
+     0.5 * (V/(1 + (V/shat2[j]))) * sum(attr(Sigma,"SinvRj")[,j] * z)^2)
+  
+  # Deal with special case of infinite shat2 (e.g., happens if X does
+  # not vary).
+  lbf[is.infinite(shat2)] = 0 
 
   maxlbf = max(lbf)
-  w = exp(lbf-maxlbf) # w =BF/BFmax
+  w = exp(lbf-maxlbf) # w = BF/BFmax
   w_weighted = w * prior_weights
   weighted_sum_w = sum(w_weighted)
-  return(log(weighted_sum_w)+ maxlbf)
+  return(log(weighted_sum_w) + maxlbf)
 }
 
-neg.loglik_z.logscale_rss = function(lV,z,R,residual_variance,prior_weights){
-  return(-loglik_rss(exp(lV),z,R,residual_variance,prior_weights))
-}
+neg.loglik_z.logscale_rss = function (lV, z, Sigma, prior_weights)
+  -loglik_rss(exp(lV),z,Sigma,prior_weights)
 
-optimize_prior_variance_rss = function(optimize_V, z, R, residual_variance, prior_weights, alpha=NULL, post_mean2=NULL,V_init=NULL){
+optimize_prior_variance_rss = function (optimize_V, z, Sigma, prior_weights,
+                                        alpha = NULL, post_mean2 = NULL,
+                                        V_init = NULL,
+                                        check_null_threshold = 0) {
   V = V_init
   if (optimize_V != "simple") {
-    if(optimize_V=="optim"){
-      lV = optim(par=log(max(c((z^2) - (residual_variance/attr(R, 'd')), 1e-6), na.rm = TRUE)),
-               fn=neg.loglik_z.logscale_rss,
-               z=z, R=R, residual_variance=residual_variance, prior_weights=prior_weights,
-               method='Brent', lower = -30, upper = 15)$par
+    if(optimize_V == "optim") {
+      lV = optim(par = log(max(c((colSums(attr(Sigma,"SinvRj") * z)^2) -
+                       (1/attr(Sigma,"RjSinvRj")),1e-6),na.rm = TRUE)),
+                 fn = neg.loglik_z.logscale_rss,z = z,Sigma = Sigma,
+                 prior_weights = prior_weights,method = "Brent",
+                 lower = -30,upper = 15)$par
       V = exp(lV)
-    }else if(optimize_V=="EM"){
-      V = sum(alpha*post_mean2)
-    }else stop('Invalid option for `optimize_V` method')
+    } else if (optimize_V == "EM")
+      V = sum(alpha * post_mean2)
+    else
+      stop("Invalid option for optimize_V")
   }
-  if(loglik_rss(0,z,R,residual_variance,prior_weights) >= loglik_rss(V,z,R,residual_variance,prior_weights)) V=0 # set V exactly 0 if that beats the numerical value
+  
+  # Set V exactly 0 if that beats the numerical value. By
+  # check_null_threshold in loglik. check_null_threshold = 0.1 is
+  # exp(0.1) = 1.1 on likelihood scale; it means that for parsimony
+  # reasons we set estiate of V to zero, if its numerical estimate is
+  # only "negligibly" different from zero. We use a likelihood ratio
+  # of exp(check_null_threshold) to define "negligible" in this
+  # context. This is fairly modest condition compared to, say, a
+  # formal LRT with p-value 0.05. But the idea is to be lenient to
+  # non-zeros estimates unless they are indeed small enough to be
+  # neglible. See more intuition at
+  # https://stephens999.github.io/fiveMinuteStats/LR_and_BF.html
+  if (loglik_rss(0,z,Sigma,prior_weights) + check_null_threshold >=
+      loglik_rss(V,z,Sigma,prior_weights))
+    V = 0
   return(V)
 }

@@ -6,23 +6,31 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>SUm of Single Effects (SuSiE) Regression — susie • susieR</title>
+<title>Sum of Single Effects (SuSiE) Regression — susie • susieR</title>
+
 
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
-<!-- sticky kit -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
+<!-- headroom.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -30,20 +38,21 @@
 
 
 
-<meta property="og:title" content="SUm of Single Effects (SuSiE) Regression — susie" />
 
+<meta property="og:title" content="Sum of Single Effects (SuSiE) Regression — susie" />
 <meta property="og:description" content="Performs Bayesian multiple linear regression of Y on
-  X; that is, this function fits the regression model \(Y = sum_l
-  Xb_l + e\), where elements of e are i.i.d. normal with zero
-  mean and variance residual_variance, and \(sum_l b_l\) is
-  a vector of length p representing the effects to be estimated. The
-  SuSiE assumption is that each b_l has exactly one non-zero
-  element. The prior on the non-zero element is normal with zero mean
-  and variance var(Y)*scaled_prior_variance.
-The model is fitted using the &quot;Iterative Bayesian Stepwise
-  Selection&quot; (IBSS) algorithm.
-See also susie_trendfilter for applying susie to non-parametric regression, particularly changepoint problems" />
-<meta name="twitter:card" content="summary" />
+  X; that is, this function fits the regression model \(Y = \sum_l
+  X b_{l=1}^L + e\), where elements of e are i.i.d. normal with
+  zero mean and variance residual_variance, and
+  \(\sum_{l=1}^L b_l\) is a vector of length p representing the
+  effects to be estimated. The &amp;#8220;susie assumption&amp;#8221; is that each
+  \(b_l\) has exactly one non-zero element. The prior on the
+  non-zero element is normal with zero mean and variance var(Y)
+  * scaled_prior_variance. The model is fitted using the
+  &amp;#8220;Iterative Bayesian Stepwise Selection&amp;#8221; (IBSS) algorithm.
+  See also susie_trendfilter for applying susie to
+  non-parametric regression, particularly changepoint problems." />
+
 
 
 
@@ -57,9 +66,10 @@ See also susie_trendfilter for applying susie to non-parametric regression, part
 <![endif]-->
 
 
+
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -73,7 +83,7 @@ See also susie_trendfilter for applying susie to non-parametric regression, part
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">susieR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.53</span>
       </span>
     </div>
 
@@ -89,7 +99,6 @@ See also susie_trendfilter for applying susie to non-parametric regression, part
   <a href="../reference/index.html">Functions</a>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/stephenslab/susieR">Source</a>
@@ -101,41 +110,136 @@ See also susie_trendfilter for applying susie to non-parametric regression, part
 </div><!--/.navbar -->
 
       
+
       </header>
 
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>SUm of Single Effects (SuSiE) Regression</h1>
-    <small class="dont-index">Source: <a href='https://github.com/stephenslab/susieR/blob/master/R/susie.R'><code>R/susie.R</code></a></small>
+    <h1>Sum of Single Effects (SuSiE) Regression</h1>
+    <small class="dont-index">Source: <a href='https://github.com/stephenslab/susieR/blob/master/R/susie.R'><code>R/susie.R</code></a>, <a href='https://github.com/stephenslab/susieR/blob/master/R/susie_rss.R'><code>R/susie_rss.R</code></a>, <a href='https://github.com/stephenslab/susieR/blob/master/R/susie_ss.R'><code>R/susie_ss.R</code></a>, and 1 more</small>
     <div class="hidden name"><code>susie.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    
     <p>Performs Bayesian multiple linear regression of Y on
-  X; that is, this function fits the regression model \(Y = sum_l
-  Xb_l + e\), where elements of e are <em>i.i.d.</em> normal with zero
-  mean and variance <code>residual_variance</code>, and \(sum_l b_l\) is
-  a vector of length p representing the effects to be estimated. The
-  SuSiE assumption is that each b_l has exactly one non-zero
-  element. The prior on the non-zero element is normal with zero mean
-  and variance <code>var(Y)*scaled_prior_variance</code>.</p>
-<p>The model is fitted using the "Iterative Bayesian Stepwise
-  Selection" (IBSS) algorithm.</p>
-<p>See also <code>susie_trendfilter</code> for applying susie to non-parametric regression, particularly changepoint problems</p>
-    
+  X; that is, this function fits the regression model \(Y = \sum_l
+  X b_{l=1}^L + e\), where elements of e are <em>i.i.d.</em> normal with
+  zero mean and variance <code>residual_variance</code>, and
+  \(\sum_{l=1}^L b_l\) is a vector of length p representing the
+  effects to be estimated. The &#8220;susie assumption&#8221; is that each
+  \(b_l\) has exactly one non-zero element. The prior on the
+  non-zero element is normal with zero mean and variance <code>var(Y)
+  * scaled_prior_variance</code>. The model is fitted using the
+  &#8220;Iterative Bayesian Stepwise Selection&#8221; (IBSS) algorithm.
+  See also <code><a href='susie_trendfilter.html'>susie_trendfilter</a></code> for applying susie to
+  non-parametric regression, particularly changepoint problems.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>susie</span>(<span class='no'>X</span>, <span class='no'>Y</span>, <span class='kw'>L</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Extremes'>min</a></span>(<span class='fl'>10</span>, <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/nrow'>ncol</a></span>(<span class='no'>X</span>)), <span class='kw'>scaled_prior_variance</span> <span class='kw'>=</span> <span class='fl'>0.2</span>,
-  <span class='kw'>residual_variance</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>prior_weights</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>null_weight</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>standardize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>estimate_residual_variance</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>estimate_prior_variance</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>estimate_prior_method</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"optim"</span>, <span class='st'>"EM"</span>, <span class='st'>"simple"</span>), <span class='kw'>s_init</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>coverage</span> <span class='kw'>=</span> <span class='fl'>0.95</span>, <span class='kw'>min_abs_corr</span> <span class='kw'>=</span> <span class='fl'>0.5</span>,
-  <span class='kw'>compute_univariate_zscore</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>na.rm</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>max_iter</span> <span class='kw'>=</span> <span class='fl'>100</span>,
-  <span class='kw'>tol</span> <span class='kw'>=</span> <span class='fl'>0.001</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>track_fit</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
-    
+    <pre class="usage"><span class='fu'>susie</span>(
+  <span class='no'>X</span>,
+  <span class='no'>Y</span>,
+  <span class='kw'>L</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>min</a></span>(<span class='fl'>10</span>, <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>X</span>)),
+  <span class='kw'>scaled_prior_variance</span> <span class='kw'>=</span> <span class='fl'>0.2</span>,
+  <span class='kw'>residual_variance</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>prior_weights</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>null_weight</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>standardize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>estimate_residual_variance</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>estimate_prior_variance</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>estimate_prior_method</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"optim"</span>, <span class='st'>"EM"</span>, <span class='st'>"simple"</span>),
+  <span class='kw'>check_null_threshold</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>prior_tol</span> <span class='kw'>=</span> <span class='fl'>1e-09</span>,
+  <span class='kw'>residual_variance_upperbound</span> <span class='kw'>=</span> <span class='fl'>Inf</span>,
+  <span class='kw'>s_init</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>coverage</span> <span class='kw'>=</span> <span class='fl'>0.95</span>,
+  <span class='kw'>min_abs_corr</span> <span class='kw'>=</span> <span class='fl'>0.5</span>,
+  <span class='kw'>compute_univariate_zscore</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>na.rm</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>max_iter</span> <span class='kw'>=</span> <span class='fl'>100</span>,
+  <span class='kw'>tol</span> <span class='kw'>=</span> <span class='fl'>0.001</span>,
+  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>track_fit</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+)
+
+<span class='fu'>susie_rss</span>(
+  <span class='no'>z</span>,
+  <span class='no'>R</span>,
+  <span class='kw'>maf</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>maf_thresh</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>z_ld_weight</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>L</span> <span class='kw'>=</span> <span class='fl'>10</span>,
+  <span class='kw'>prior_variance</span> <span class='kw'>=</span> <span class='fl'>50</span>,
+  <span class='kw'>residual_variance</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>r_tol</span> <span class='kw'>=</span> <span class='fl'>1e-08</span>,
+  <span class='kw'>prior_weights</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>null_weight</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>estimate_residual_variance</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>estimate_prior_variance</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>estimate_prior_method</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"optim"</span>, <span class='st'>"EM"</span>, <span class='st'>"simple"</span>),
+  <span class='kw'>check_null_threshold</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>prior_tol</span> <span class='kw'>=</span> <span class='fl'>1e-09</span>,
+  <span class='kw'>max_iter</span> <span class='kw'>=</span> <span class='fl'>100</span>,
+  <span class='kw'>s_init</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>intercept_value</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>coverage</span> <span class='kw'>=</span> <span class='fl'>0.95</span>,
+  <span class='kw'>min_abs_corr</span> <span class='kw'>=</span> <span class='fl'>0.5</span>,
+  <span class='kw'>tol</span> <span class='kw'>=</span> <span class='fl'>0.001</span>,
+  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>track_fit</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>check_R</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>check_z</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>
+)
+
+<span class='fu'>susie_suff_stat</span>(
+  <span class='no'>bhat</span>,
+  <span class='no'>shat</span>,
+  <span class='no'>R</span>,
+  <span class='no'>n</span>,
+  <span class='no'>var_y</span>,
+  <span class='no'>XtX</span>,
+  <span class='no'>Xty</span>,
+  <span class='no'>yty</span>,
+  <span class='kw'>maf</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>maf_thresh</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>L</span> <span class='kw'>=</span> <span class='fl'>10</span>,
+  <span class='kw'>scaled_prior_variance</span> <span class='kw'>=</span> <span class='fl'>0.2</span>,
+  <span class='kw'>residual_variance</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>estimate_residual_variance</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>estimate_prior_variance</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>estimate_prior_method</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"optim"</span>, <span class='st'>"EM"</span>, <span class='st'>"simple"</span>),
+  <span class='kw'>check_null_threshold</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>prior_tol</span> <span class='kw'>=</span> <span class='fl'>1e-09</span>,
+  <span class='kw'>r_tol</span> <span class='kw'>=</span> <span class='fl'>1e-08</span>,
+  <span class='kw'>prior_weights</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>null_weight</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>standardize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>max_iter</span> <span class='kw'>=</span> <span class='fl'>100</span>,
+  <span class='kw'>s_init</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>intercept_value</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>coverage</span> <span class='kw'>=</span> <span class='fl'>0.95</span>,
+  <span class='kw'>min_abs_corr</span> <span class='kw'>=</span> <span class='fl'>0.5</span>,
+  <span class='kw'>tol</span> <span class='kw'>=</span> <span class='fl'>0.001</span>,
+  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>track_fit</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>check_input</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+)
+
+<span class='fu'>susie_auto</span>(
+  <span class='no'>X</span>,
+  <span class='no'>Y</span>,
+  <span class='kw'>L_init</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>L_max</span> <span class='kw'>=</span> <span class='fl'>512</span>,
+  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>init_tol</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>standardize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>max_iter</span> <span class='kw'>=</span> <span class='fl'>100</span>,
+  <span class='kw'>tol</span> <span class='kw'>=</span> <span class='fl'>0.01</span>,
+  <span class='no'>...</span>
+)</pre>
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -145,29 +249,28 @@ See also susie_trendfilter for applying susie to non-parametric regression, part
     </tr>
     <tr>
       <th>Y</th>
-      <td><p>A vector of length n.</p></td>
+      <td><p>The observed responses, a vector of length n.</p></td>
     </tr>
     <tr>
       <th>L</th>
-      <td><p>Number of components (nonzero elements) in the SuSiE
-regression model. If <code>L</code> is larger than the number of
-covariate (p), <code>L</code> is set to p.</p></td>
+      <td><p>Number of components (nonzero coefficients) in the susie
+regression model. If L is larger than the number of covariates, p,
+L is set to p.</p></td>
     </tr>
     <tr>
       <th>scaled_prior_variance</th>
       <td><p>The scaled prior variance. This is
- either a scalar, or a vector of length <code>L</code>. The prior variance
-of each non-zero element of b is set to
-<code>var(Y)*scaled_prior_variance</code>. If
-<code>estimate_prior_variance = TRUE</code>, this input simply provides
-initial estimates of the prior variances.</p></td>
+either a scalar or a vector of length <code>L</code>. The prior variance
+of each non-zero element of b is set to <code>var(Y) *
+scaled_prior_variance</code>. If <code>estimate_prior_variance = TRUE</code>,
+this provides initial estimates of the prior variances.</p></td>
     </tr>
     <tr>
       <th>residual_variance</th>
-      <td><p>The variance of the residual. If
-<code>estimate_residual_variance = TRUE</code>, this value simply provides the
-initial estimate of the residual variance. By default, it is set to
-<code><a href='https://www.rdocumentation.org/packages/stats/topics/cor'>var(Y)</a></code>.</p></td>
+      <td><p>Variance of the residual. If
+<code>estimate_residual_variance = TRUE</code>, this value provides the
+initial estimate of the residual variance. By default, it is
+<code><a href='https://rdrr.io/r/stats/cor.html'>var(Y)</a></code>.</p></td>
     </tr>
     <tr>
       <th>prior_weights</th>
@@ -183,44 +286,71 @@ nonzero effect on the outcome, Y.</p></td>
     <tr>
       <th>standardize</th>
       <td><p>If <code>standardize = TRUE</code>, standardize the
-columns of X to unit variance prior to fitting. Note that
-`scaled_prior_variance` specifies the prior on the coefficients of
-X <em>after</em> standardization (if it is performed). If you do not
-standardize, you may need to think more carefully about specifying
-<code>scaled_prior_variance</code>. Whatever your choice, the
-coefficients returned by <code>coef</code> are given for <code>X</code> on the
-original input scale. Any column of <code>X</code> that has zero variance is
-not standardized, but left as is.</p></td>
+columns of X (or XtX and Xty) to unit variance prior to
+fitting. Note that <code>scaled_prior_variance</code> specifies the prior
+on the coefficients of X <em>after</em> standardization (if it is
+performed). If you do not standardize, you may need to think more
+carefully about specifying <code>scaled_prior_variance</code>. Whatever
+your choice, the coefficients returned by <code>coef</code> are given for
+<code>X</code> on the original input scale. Any column of <code>X</code> that
+has zero variance is not standardized.</p></td>
     </tr>
     <tr>
       <th>intercept</th>
       <td><p>If <code>intercept = TRUE</code>, the intercept is
-fitted; otherwise, it is set to zero. Setting <code>intercept =
-FALSE</code> is generally not recommended.</p></td>
+fitted; it <code>intercept = FALSE</code>, the intercept is set to
+zero. Setting <code>intercept = FALSE</code> is generally not
+recommended.</p></td>
     </tr>
     <tr>
       <th>estimate_residual_variance</th>
       <td><p>If
-<code>estimate_residual_variance = TRUE</code>, the residual variance
-is estimated (using <code>residual_variance</code> as an initial  value).
-If <code>estimate_residual_variance = FALSE</code>
-then the residual variance is fixed to the value supplied by <code>residual_variance</code>.</p></td>
+<code>estimate_residual_variance = TRUE</code>, the residual variance is
+estimated, using <code>residual_variance</code> as an initial value. If
+<code>estimate_residual_variance = FALSE</code>, the residual variance is
+fixed to the value supplied by <code>residual_variance</code>.</p></td>
     </tr>
     <tr>
       <th>estimate_prior_variance</th>
       <td><p>If <code>estimate_prior_variance =
-TRUE</code>, the prior variance is estimated (a separate parameter for each of the <code>L</code>
-effects). If provided, <code>scaled_prior_variance</code> is then used as an initial
-point for the optimization. If <code>estimate_prior_variance = FALSE</code>
-then the prior variance (for each of the <code>L</code> effects) is determined by the value
-supplied to <code>scaled_prior_variance</code>.</p></td>
+TRUE</code>, the prior variance is estimated (this is a separate
+parameter for each of the L effects). If provided,
+<code>scaled_prior_variance</code> is then used as an initial value for
+the optimization. When <code>estimate_prior_variance = FALSE</code>, the
+prior variance for each of the L effects is determined by the
+value supplied to <code>scaled_prior_variance</code>.</p></td>
     </tr>
     <tr>
       <th>estimate_prior_method</th>
       <td><p>The method used for estimating prior
-variance. "simple" method only compares the loglikelihood between
-using specified prior variance and using zero, and chose the one that
-gives larger loglikelihood.</p></td>
+variance. When <code>estimate_prior_method = "simple"</code> is used, the
+likelihood at the specified prior variance is compared to the
+likelihood at a variance of zero, and the setting with the larger
+likelihood is retained.</p></td>
+    </tr>
+    <tr>
+      <th>check_null_threshold</th>
+      <td><p>When the prior variance is estimated,
+compare the estimate with the null, and set the prior variance to
+zero unless the log-likelihood using the estimate is larger by this
+threshold amount. For example, if you set
+<code>check_null_threshold = 0.1</code>, this will "nudge" the estimate
+towards zero when the difference in log-likelihoods is small. A
+note of caution that setting this to a value greater than zero may
+lead the IBSS fitting procedure to occasionally decrease the ELBO.</p></td>
+    </tr>
+    <tr>
+      <th>prior_tol</th>
+      <td><p>When the prior variance is estimated, compare the
+estimated value to <code>prior_tol</code> at the end of the computation,
+and exclude a single effect from PIP computation if the estimated
+prior variance is smaller than this tolerance value.</p></td>
+    </tr>
+    <tr>
+      <th>residual_variance_upperbound</th>
+      <td><p>Upper limit on the estimated
+residual variance. It is only relevant when
+<code>estimate_residual_variance = TRUE</code>.</p></td>
     </tr>
     <tr>
       <th>s_init</th>
@@ -228,15 +358,15 @@ gives larger loglikelihood.</p></td>
     </tr>
     <tr>
       <th>coverage</th>
-      <td><p>A number between 0 and 1 specifying the coverage of
-the estimated confidence sets.</p></td>
+      <td><p>A number between 0 and 1 specifying the
+&#8220;coverage&#8221; of the estimated confidence sets.</p></td>
     </tr>
     <tr>
       <th>min_abs_corr</th>
-      <td><p>Minimum of absolute value of correlation
-allowed in a credible set. The default, 0.5, corresponds to squared
+      <td><p>Minimum absolute correlation allowed in a
+credible set. The default, 0.5, corresponds to a squared
 correlation of 0.25, which is a commonly used threshold for
-genotype data in genetics studies.</p></td>
+genotype data in genetic studies.</p></td>
     </tr>
     <tr>
       <th>compute_univariate_zscore</th>
@@ -246,35 +376,151 @@ variable.</p></td>
     </tr>
     <tr>
       <th>na.rm</th>
-      <td><p>Drop missing samples in y from both y and X inputs. Default set to FALSE.</p></td>
+      <td><p>Drop any missing values in Y from both X and Y.</p></td>
     </tr>
     <tr>
       <th>max_iter</th>
-      <td><p>Maximum number of iterations of the IBSS fitting
-procedure.</p></td>
+      <td><p>Maximum number of IBSS iterations to perform.</p></td>
     </tr>
     <tr>
       <th>tol</th>
       <td><p>A small, non-negative number specifying the convergence
 tolerance for the IBSS fitting procedure. The fitting procedure
 will halt when the difference in the variational lower bound, or
-"ELBO" (this is the objective function to be maximized), is less
-than <code>tol</code>.</p></td>
+&#8220;ELBO&#8221; (the objective function to be maximized), is
+less than <code>tol</code>.</p></td>
     </tr>
     <tr>
       <th>verbose</th>
-      <td><p>If <code>verbose = TRUE</code>, the algorithm's
-progress and a summary of the optimization settings are printed to
-the console.</p></td>
+      <td><p>If <code>verbose = TRUE</code>, the algorithm's progress,
+and a summary of the optimization settings, are printed to the
+console.</p></td>
     </tr>
     <tr>
       <th>track_fit</th>
-      <td><p>If <code>track_fit = TRUE</code>, an object <code>trace</code>
+      <td><p>If <code>track_fit = TRUE</code>, <code>trace</code>
 is also returned containing detailed information about the
 estimates at each iteration of the IBSS fitting procedure.</p></td>
     </tr>
+    <tr>
+      <th>z</th>
+      <td><p>A p-vector of z scores.</p></td>
+    </tr>
+    <tr>
+      <th>R</th>
+      <td><p>A p by p symmetric, positive semidefinite matrix. It
+can be \(X'X\), the covariance matrix \(X'X/(n-1)\), or a
+correlation matrix. It should be estimated from the same samples
+used to compute <code>bhat</code> and <code>shat</code>. Using an out-of-sample
+matrix may produce unreliable results.</p></td>
+    </tr>
+    <tr>
+      <th>maf</th>
+      <td><p>Minor allele frequency; to be used along with
+<code>maf_thresh</code> to filter input summary statistics.</p></td>
+    </tr>
+    <tr>
+      <th>maf_thresh</th>
+      <td><p>Variants having a minor allele frequency smaller
+than this threshold are not used.</p></td>
+    </tr>
+    <tr>
+      <th>z_ld_weight</th>
+      <td><p>The weights assigned to the z scores in the LD
+matrix. The LD matrix used in the model is <code><a href='https://rdrr.io/r/stats/cor.html'>cov2cor((1-w)*R +
+w*tcrossprod(z))</a></code>, where <code>w = z_ld_weight</code>. We recommend
+setting <code>z_ld_weight</code> as 1/n, where n is the number of
+samples.</p></td>
+    </tr>
+    <tr>
+      <th>prior_variance</th>
+      <td><p>The prior variance. It is either a scalar or
+a vector of length L.</p></td>
+    </tr>
+    <tr>
+      <th>r_tol</th>
+      <td><p>Tolerance level for eigenvalue check of positive
+semidefinite matrix of R.</p></td>
+    </tr>
+    <tr>
+      <th>intercept_value</th>
+      <td><p>The intercept. (The intercept cannot be
+estimated from centered summary data.) This setting will be used by
+<code>coef</code> to assign an intercept value, mainly for consistency
+with <code>susie</code>. Set to <code>NULL</code> if you want <code>coef</code> not
+to include an intercept term (and so only a p-vector is returned).</p></td>
+    </tr>
+    <tr>
+      <th>check_R</th>
+      <td><p>If <code>check_R = TRUE</code>, check that <code>R</code> is
+positive semidefinite.</p></td>
+    </tr>
+    <tr>
+      <th>check_z</th>
+      <td><p>If <code>check_z = TRUE</code>, check that <code>z</code> is in
+space spanned by the non-zero eigenvectors of <code>R</code>.</p></td>
+    </tr>
+    <tr>
+      <th>bhat</th>
+      <td><p>A p-vector of estimated effects.</p></td>
+    </tr>
+    <tr>
+      <th>shat</th>
+      <td><p>A p-vector of standard errors.</p></td>
+    </tr>
+    <tr>
+      <th>n</th>
+      <td><p>The sample size.</p></td>
+    </tr>
+    <tr>
+      <th>var_y</th>
+      <td><p>The sample variance of y, defined as \(y'y/(n-1)\).
+When the sample variance cannot be provided, the coefficients
+(returned from <code>coef</code>) are computed on the "standardized" X, y
+scale.</p></td>
+    </tr>
+    <tr>
+      <th>XtX</th>
+      <td><p>A p by p matrix \(X'X\) in which the columns of X
+are centered to have mean zero.</p></td>
+    </tr>
+    <tr>
+      <th>Xty</th>
+      <td><p>A p-vector \(X'y\) in which y and the columns of X are
+centered to have mean zero.</p></td>
+    </tr>
+    <tr>
+      <th>yty</th>
+      <td><p>A scalar \(y'y\) in which y is centered to have mean
+zero.</p></td>
+    </tr>
+    <tr>
+      <th>check_input</th>
+      <td><p>If <code>check_input = TRUE</code>,
+<code>susie_suff_stat</code> performs additional checks on <code>XtX</code> and
+<code>Xty</code>. The checks are: (1) check that <code>XtX</code> is positive
+semidefinite; (2) check that <code>Xty</code> is in the space spanned by
+the non-zero eigenvectors of <code>XtX</code>.</p></td>
+    </tr>
+    <tr>
+      <th>L_init</th>
+      <td><p>The initial value of L.</p></td>
+    </tr>
+    <tr>
+      <th>L_max</th>
+      <td><p>The largest value of L to consider.</p></td>
+    </tr>
+    <tr>
+      <th>init_tol</th>
+      <td><p>The tolerance to passed to <code>susie</code> during
+early runs (set large to shorten the initial runs).</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>Additional arguments passed to <code>susie</code>.</p></td>
+    </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A <code>"susie"</code> object with some or all of the following
@@ -287,75 +533,125 @@ estimates at each iteration of the IBSS fitting procedure.</p></td>
 <dt>mu2</dt><dd><p>An L by p matrix of posterior second moments,
   conditional on inclusion.</p></dd>
 
-<dt>Xr</dt><dd><p>An vector of length n, equal to <code>X %*% colSums(alpha
+<dt>Xr</dt><dd><p>A vector of length n, equal to <code>X %*% colSums(alpha
   * mu)</code>.</p></dd>
 
-<dt>intercept</dt><dd><p>The intercept (fixed or estimated).</p></dd>
+<dt>lbf</dt><dd><p>log-Bayes Factor for each single effect.</p></dd>
+
+<dt>lbf_variable</dt><dd><p>log-Bayes Factor for each variable and single effect.</p></dd>
+
+<dt>intercept</dt><dd><p>Intercept (fixed or estimated).</p></dd>
 
 <dt>sigma2</dt><dd><p>Residual variance (fixed or estimated).</p></dd>
 
 <dt>V</dt><dd><p>Prior variance of the non-zero elements of b, equal to
   <code>scaled_prior_variance * var(Y)</code>.</p></dd>
 
-<dt>elbo</dt><dd><p>The value of the variational lower bound, or "ELBO"
-  (the objective function to be maximized), achieved at each
-  iteration of the IBSS fitting procedure.</p></dd>
+<dt>elbo</dt><dd><p>The value of the variational lower bound, or
+  &#8220;ELBO&#8221; (objective function to be maximized), achieved at
+  each iteration of the IBSS fitting procedure.</p></dd>
 
-<dt>fitted</dt><dd><p>Vector of length n containing the "fitted" values of
+<dt>fitted</dt><dd><p>Vector of length n containing the fitted values of
   the outcome.</p></dd>
 
 <dt>sets</dt><dd><p>Credible sets estimated from model fit; see
-  <code><a href='susie_get_cs.html'>susie_get_cs</a></code> for details.</p></dd>
+  <code><a href='susie_get_methods.html'>susie_get_cs</a></code> for details.</p></dd>
 
 <dt>pip</dt><dd><p>A vector of length p giving the (marginal) posterior
   inclusion probabilities for all p covariates.</p></dd>
 
 <dt>z</dt><dd><p>A vector of univariate z-scores.</p></dd>
 
-<dt>niter</dt><dd><p>Number of IBSS iterations that were run.</p></dd>
+<dt>niter</dt><dd><p>Number of IBSS iterations that were performed.</p></dd>
 
-<dt>converged</dt><dd><p><code>TRUE</code> or <code>FALSE</code>, indicating whether
+<dt>converged</dt><dd><p><code>TRUE</code> or <code>FALSE</code> indicating whether
   the IBSS converged to a solution within the chosen tolerance
   level.</p></dd>
 
-    
+susie_suff_stat returns also outputs:
+
+<dt>XtXr</dt><dd><p>A p-vector of <code><a href='https://rdrr.io/r/base/t.html'>t(X)</a></code> times the fitted values,
+  <code>X %*% colSums(alpha*mu)</code>.</p></dd>
+
+susie_rss also outputs:
+
+<dt>Rr</dt><dd><p>An p-vector of <code><a href='https://rdrr.io/r/base/t.html'>t(X)</a></code> times fitted values, <code>X
+  %*% colSums(alpha*mu)</code>.</p></dd>
+
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p><code>susie_suff_stat</code> performs sum of single-effect
+linear regression with summary statistics. The required summary
+data are either: <code>bhat</code>, <code>shat</code>, the p by p symmetric,
+positive semidefinite correlation (or covariance) matrix <code>R</code>,
+the sample size <code>n</code>, and the variance of y; or the p by p
+matrix \(X'X\), the p-vector \(X'y\), the sum of squares
+\(y'y\), and the sample size <code>n</code>. The summary statistics
+should come from the same individuals. Both the columns of X and
+the vector y should be centered to have mean zero before computing
+these summary statistics; you may also want to scale each column of
+X and y to have variance 1 (see examples).</p>
+<p><code>susie_rss</code> performs sum of single-effect linear regression
+with z scores; all posterior calculations are for z-scores. This
+function fits the regression model \(z = \sum_l R*b_l + e\),
+where e is \(N(0,residual_var*R)\) and \(\sum_l b_l\) is a
+p-vector of effects to be estimated. The required summary data are
+the p by p correlation matrix, <code>R</code>, and the p-vector
+<code>z</code>. The summary stats should come from the same individuals
+(samples).</p>
+
+
+
+<p>susie_auto is an attempt to automate reliable running of susie even
+on hard problems. It implements a three-stage strategy for each L:
+first, fit susie with very small residual error; next, estimate
+residual error; finally, estimate the prior variance. If the last
+step estimates some prior variances to be zero, stop. Otherwise,
+double L, and repeat. Initial runs are performed with relaxed
+tolerance; the final run is performed using the default susie
+tolerance.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p>G. Wang, A. Sarkar, P. Carbonetto and M. Stephens (2018). A simple
-new approach to variable selection in regression, with application
-to genetic fine-mapping. <em>bioRxiv</em>
-<a href='https://doi.org/10.1101/501114'>https://doi.org/10.1101/501114</a>.</p>
-    
+    <p>G. Wang, A. Sarkar, P. Carbonetto and M. Stephens (2020). A simple
+  new approach to variable selection in regression, with application
+  to genetic fine-mapping. <em>Journal of the Royal Statistical
+  Society, Series B</em> <a href='https://doi.org/10.1101/501114'>https://doi.org/10.1101/501114</a>.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><span class='co'># NOT RUN {</span>
-<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Random'>set.seed</a></span>(<span class='fl'>1</span>)
+    <pre class="examples"><div class='input'>
+<span class='co'># susie example.</span>
+<span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>1</span>)
 <span class='no'>n</span> <span class='kw'>=</span> <span class='fl'>1000</span>
 <span class='no'>p</span> <span class='kw'>=</span> <span class='fl'>1000</span>
-<span class='no'>beta</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/rep'>rep</a></span>(<span class='fl'>0</span>,<span class='no'>p</span>)
+<span class='no'>beta</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fl'>0</span>,<span class='no'>p</span>)
 <span class='no'>beta</span>[<span class='fl'>1</span>:<span class='fl'>4</span>] <span class='kw'>=</span> <span class='fl'>1</span>
-<span class='no'>X</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/matrix'>matrix</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='no'>n</span>*<span class='no'>p</span>),<span class='kw'>nrow</span><span class='kw'>=</span><span class='no'>n</span>,<span class='kw'>ncol</span><span class='kw'>=</span><span class='no'>p</span>)
-<span class='no'>y</span> <span class='kw'>=</span> <span class='no'>X</span> <span class='kw'>%*%</span> <span class='no'>beta</span> + <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='no'>n</span>)
-<span class='no'>res</span> <span class='kw'>=</span> <span class='fu'>susie</span>(<span class='no'>X</span>,<span class='no'>y</span>,<span class='kw'>L</span><span class='kw'>=</span><span class='fl'>10</span>)
-<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/coef'>coef</a></span>(<span class='no'>res</span>)
-<span class='fu'><a href='https://www.rdocumentation.org/packages/graphics/topics/plot'>plot</a></span>(<span class='no'>y</span>,<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/predict'>predict</a></span>(<span class='no'>res</span>))
-
-<span class='co'># }</span></pre>
+<span class='no'>X</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span>(<span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='no'>n</span>*<span class='no'>p</span>),<span class='kw'>nrow</span> <span class='kw'>=</span> <span class='no'>n</span>,<span class='kw'>ncol</span> <span class='kw'>=</span> <span class='no'>p</span>)
+<span class='no'>X</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/scale.html'>scale</a></span>(<span class='no'>X</span>,<span class='kw'>center</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,<span class='kw'>scale</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+<span class='no'>y</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/drop.html'>drop</a></span>(<span class='no'>X</span> <span class='kw'>%*%</span> <span class='no'>beta</span> + <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='no'>n</span>))
+<span class='no'>res1</span> <span class='kw'>=</span> <span class='fu'>susie</span>(<span class='no'>X</span>,<span class='no'>y</span>,<span class='kw'>L</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+<span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>beta</span>,<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>(<span class='no'>res1</span>)[-<span class='fl'>1</span>])</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/abline.html'>abline</a></span>(<span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>0</span>,<span class='kw'>b</span> <span class='kw'>=</span> <span class='fl'>1</span>,<span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"skyblue"</span>,<span class='kw'>lty</span> <span class='kw'>=</span> <span class='st'>"dashed"</span>)</div><div class='img'><img src='susie-1.png' alt='' width='700' height='433' /></div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>y</span>,<span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span>(<span class='no'>res1</span>))</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/abline.html'>abline</a></span>(<span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>0</span>,<span class='kw'>b</span> <span class='kw'>=</span> <span class='fl'>1</span>,<span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"skyblue"</span>,<span class='kw'>lty</span> <span class='kw'>=</span> <span class='st'>"dashed"</span>)</div><div class='img'><img src='susie-2.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='co'># susie_suff_stat example.</span>
+<span class='no'>input_ss</span> <span class='kw'>=</span> <span class='fu'><a href='compute_ss.html'>compute_ss</a></span>(<span class='no'>X</span>,<span class='no'>y</span>,<span class='kw'>standardize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+<span class='no'>res2</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/with.html'>with</a></span>(<span class='no'>input_ss</span>,
+            <span class='fu'>susie_suff_stat</span>(<span class='kw'>XtX</span> <span class='kw'>=</span> <span class='no'>XtX</span>,<span class='kw'>Xty</span> <span class='kw'>=</span> <span class='no'>Xty</span>,<span class='kw'>yty</span> <span class='kw'>=</span> <span class='no'>yty</span>,<span class='kw'>n</span> <span class='kw'>=</span> <span class='no'>n</span>,<span class='kw'>L</span> <span class='kw'>=</span> <span class='fl'>10</span>))
+<span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>(<span class='no'>res1</span>)[-<span class='fl'>1</span>],<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>(<span class='no'>res2</span>)[-<span class='fl'>1</span>])</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/abline.html'>abline</a></span>(<span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>0</span>,<span class='kw'>b</span> <span class='kw'>=</span> <span class='fl'>1</span>,<span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"skyblue"</span>,<span class='kw'>lty</span> <span class='kw'>=</span> <span class='st'>"dashed"</span>)</div><div class='img'><img src='susie-3.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='co'># susie_rss example.</span>
+<span class='no'>ss</span>   <span class='kw'>&lt;-</span> <span class='kw pkg'>susieR</span><span class='kw ns'>:::</span><span class='fu'><a href='univariate_regression.html'>univariate_regression</a></span>(<span class='no'>X</span>,<span class='no'>y</span>)
+<span class='no'>R</span>    <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/with.html'>with</a></span>(<span class='no'>input_ss</span>,<span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>cov2cor</a></span>(<span class='no'>XtX</span>))
+<span class='no'>zhat</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/with.html'>with</a></span>(<span class='no'>ss</span>,<span class='no'>betahat</span>/<span class='no'>sebetahat</span>)
+<span class='no'>res3</span> <span class='kw'>&lt;-</span> <span class='fu'>susie_rss</span>(<span class='no'>zhat</span>,<span class='no'>R</span>,<span class='kw'>L</span> <span class='kw'>=</span> <span class='fl'>10</span>)</div><div class='output co'>#&gt; <span class='message'>Input z is in space spanned by the non-zero eigenvectors of R. You can safely set "check_z = FALSE" when you rerun the analysis, to save computation.</span></div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>(<span class='no'>res1</span>)[-<span class='fl'>1</span>]/<span class='no'>ss</span>$<span class='no'>sebetahat</span>,<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>(<span class='no'>res3</span>)[-<span class='fl'>1</span>])</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/abline.html'>abline</a></span>(<span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>0</span>,<span class='kw'>b</span> <span class='kw'>=</span> <span class='fl'>1</span>,<span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"skyblue"</span>,<span class='kw'>lty</span> <span class='kw'>=</span> <span class='st'>"dashed"</span>)</div><div class='img'><img src='susie-4.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='co'># susie_auto example.</span>
+<span class='no'>res4</span> <span class='kw'>&lt;-</span> <span class='fu'>susie_auto</span>(<span class='no'>X</span>,<span class='no'>y</span>)
+<span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>beta</span>,<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>(<span class='no'>res4</span>)[-<span class='fl'>1</span>])</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/abline.html'>abline</a></span>(<span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>0</span>,<span class='kw'>b</span> <span class='kw'>=</span> <span class='fl'>1</span>,<span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"skyblue"</span>,<span class='kw'>lty</span> <span class='kw'>=</span> <span class='st'>"dashed"</span>)</div><div class='img'><img src='susie-5.png' alt='' width='700' height='433' /></div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>y</span>,<span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span>(<span class='no'>res4</span>))</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/abline.html'>abline</a></span>(<span class='kw'>a</span> <span class='kw'>=</span> <span class='fl'>0</span>,<span class='kw'>b</span> <span class='kw'>=</span> <span class='fl'>1</span>,<span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"skyblue"</span>,<span class='kw'>lty</span> <span class='kw'>=</span> <span class='st'>"dashed"</span>)</div><div class='img'><img src='susie-6.png' alt='' width='700' height='433' /></div><div class='input'>
+</div></pre>
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      
-      <li><a href="#value">Value</a></li>
-
-      <li><a href="#references">References</a></li>
-      
-      <li><a href="#examples">Examples</a></li>
-    </ul>
-
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
+
 
       <footer>
       <div class="copyright">
@@ -363,13 +659,16 @@ to genetic fine-mapping. <em>bioRxiv</em>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
+
       </footer>
    </div>
 
   
 
+
   </body>
 </html>
+
 

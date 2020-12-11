@@ -30,7 +30,7 @@ but they are too correlated to be sure which one.
 
 The package is developed by Gao Wang, Peter Carbonetto, Yuxin Zou,
 Kaiqian Zhang, and Matthew Stephens from the
-[Stephens Lab](http://stephenslab.uchicago.edu/) at the University of
+[Stephens Lab](http://stephenslab.uchicago.edu) at the University of
 Chicago.
 
 This is very much work in progress. Please
@@ -39,35 +39,31 @@ questions, get our support or provide us feedback; please
 [send pull requests](https://github.com/stephenslab/susieR/pulls) if
 you have helped fixing bugs or making improvements to the source code.
 
-## Setup
+## Quick Start
 
 To automatically retrieve and install `susieR` from this repository,
 with the vignettes included, run:
 
 ```R
-devtools::install_github("stephenslab/susieR@0.9.0",build_vignettes = TRUE)
+devtools::install_github("stephenslab/susieR")
 ```
-
-## Quick Start
 
 See [here](https://stephenslab.github.io/susieR/articles/mwe.html) for
 a brief illustration of `susieR`.  For more documentation and examples
 please visit https://stephenslab.github.io/susieR
 
+## Citing this work
+
+If you find the `susieR` package or any of the source code in this
+repository useful for your work, please cite:
+
+> Wang, G., Sarkar, A., Carbonetto, P., & Stephens, M. (2020). A simple new approach to variable selection in regression, with application to genetic fine mapping. Journal of the Royal Statistical Society: Series B (Statistical Methodology). https://doi.org/10.1111/rssb.12388
+
 ## Developer notes
 
-+ When any changes are made to `roxygen2` markup, simply run
-`devtools::document()` to update package `NAMESPACE`
-and documentation files.
-
-+ To install and test the development version of susieR, run the
-following commands in the shell:
-
-    ```bash
-    R CMD build --resave-data --no-build-vignettes susieR
-    R CMD INSTALL susieR_0.9.0.tar.gz
-    R CMD check --as-cran --ignore-vignettes susieR_0.9.0.tar.gz
-    ```
++ When any changes are made to `roxygen2` markup, run
+`devtools::document()` to update package `NAMESPACE` and documentation
+files.
 
 + Run `pkgdown::build_site()` to build the website. Getting `pkgdown`
 to work properly can be frustrating due to numerous & fragile dependencies.
@@ -79,3 +75,5 @@ docker run --rm --security-opt label:disable -t -P -w $PWD -v $PWD:$PWD \
   -u $UID:${GROUPS[0]} -e HOME=/home/$USER -e USER=$USER gaow/susie \
   R --slave -e "pkgdown::build_site(lazy=TRUE, examples=FALSE)"
 ```
+
+[susie-preprint]: https://doi.org/10.1101/501114

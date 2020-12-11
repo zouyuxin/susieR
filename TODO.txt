@@ -1,0 +1,6 @@
+to do
+=====
+
++ Update README.
+
++ Update pkgdown site.

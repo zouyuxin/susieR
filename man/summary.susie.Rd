@@ -2,16 +2,25 @@
 % Please edit documentation in R/summary.susie.R
 \name{summary.susie}
 \alias{summary.susie}
-\title{summarize susie fit}
+\alias{print.summary.susie}
+\title{Summarize Susie Fit.}
 \usage{
 \method{summary}{susie}(object, ...)
+
+\method{print}{summary.susie}(x, ...)
 }
 \arguments{
-\item{object}{a susie fit}
+\item{object}{A susie fit.}
+
+\item{\dots}{Additional arguments passed to the generic \code{summary}
+or \code{print.summary} method.}
+
+\item{x}{A susie summary.}
 }
 \value{
-a data.frame of variables and a data.frame of credible sets
+\code{summary.susie} returns a list containing a data frame
+  of variables and a data frame of credible sets.
 }
 \description{
-summarize susie fit
+\code{summary} method for the \dQuote{susie} class.
 }
