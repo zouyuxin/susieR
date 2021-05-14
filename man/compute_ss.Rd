@@ -2,9 +2,9 @@
 % Please edit documentation in R/compute_ss.R
 \name{compute_ss}
 \alias{compute_ss}
-\title{Compute sufficient statistics for susie.}
+\title{Compute sufficient statistics for input to \code{susie_suff_stat}}
 \usage{
-compute_ss(X, y, standardize = TRUE)
+compute_ss(X, y, standardize = FALSE)
 }
 \arguments{
 \item{X}{An n by p matrix of covariates.}
@@ -12,13 +12,13 @@ compute_ss(X, y, standardize = TRUE)
 \item{y}{An n vector.}
 
 \item{standardize}{Logical flag indicating whether to standardize
-columns of X to unit variance prior to fitting.}
+columns of X to unit variance prior to computing summary data.}
 }
 \value{
-A list of sufficient statistics.
+A list of sufficient statistics (X'X, X'y, y'y and n)
 }
 \description{
-Compute sufficient statistics for susie.
+This is a synonym for \code{compute_suff_stat} included for historical reasons; deprecated.
 }
 \examples{
 data(N2finemapping)

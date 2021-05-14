@@ -104,7 +104,7 @@ susie_get_objective = function (res, last_only = TRUE, warning_tol = 1e-6) {
 #' @export
 #'
 susie_get_posterior_mean = function (res, prior_tol = 1e-9) {
-    
+
   # Drop the single-effects with estimated prior of zero.
   if (is.numeric(res$V))
     include_idx = which(res$V > prior_tol)
@@ -113,7 +113,7 @@ susie_get_posterior_mean = function (res, prior_tol = 1e-9) {
 
   # Now extract relevant rows from alpha matrix.
   if (length(include_idx) > 0)
-    return(colSums((res$alpha*res$mu)[include_idx,])/
+    return(colSums((res$alpha*res$mu)[include_idx,,drop=FALSE])/
            res$X_column_scale_factors)
   else
     return(numeric(ncol(res$mu)))
@@ -124,7 +124,7 @@ susie_get_posterior_mean = function (res, prior_tol = 1e-9) {
 #' @export
 #'
 susie_get_posterior_sd = function (res, prior_tol = 1e-9) {
-    
+
   # Drop the single-effects with estimated prior of zero.
   if (is.numeric(res$V))
     include_idx = which(res$V > prior_tol)
@@ -134,7 +134,7 @@ susie_get_posterior_sd = function (res, prior_tol = 1e-9) {
   # Now extract relevant rows from alpha matrix.
   if (length(include_idx) > 0)
     return(sqrt(colSums((res$alpha * res$mu2 -
-                         (res$alpha*res$mu)^2)[include_idx,]))/
+                         (res$alpha*res$mu)^2)[include_idx,,drop=FALSE]))/
            (res$X_column_scale_factors))
   else
     return(numeric(ncol(res$mu)))
@@ -182,17 +182,17 @@ susie_get_lfsr = function (res) {
 #'
 #' @importFrom stats rmultinom
 #' @importFrom stats rnorm
-#' 
+#'
 #' @export
 #'
 susie_get_posterior_samples <- function (susie_fit, num_samples) {
-    
+
   # Remove effects having estimated prior variance equals zero.
   if (is.numeric(susie_fit$V))
     include_idx = which(susie_fit$V > 1e-9)
   else
     include_idx = 1:nrow(susie_fit$alpha)
-  
+
   posterior_mean = sweep(susie_fit$mu,2,susie_fit$X_column_scale_factors,"/")
   posterior_sd = sweep(sqrt(susie_fit$mu2 - (susie_fit$mu)^2),2,
                        susie_fit$X_column_scale_factors,"/")
@@ -251,22 +251,17 @@ susie_get_cs = function (res, X = NULL, Xcorr = NULL, coverage = 0.95,
     stop("Only one of X or Xcorr should be specified")
   if (!is.null(Xcorr) && !is_symmetric_matrix(Xcorr))
     stop("Xcorr matrix must be symmetric")
-  if (inherits(res,"susie")) {
-    null_index = res$null_index
-    if (is.numeric(res$V))
-      include_idx = res$V > 1e-9
-    else
-      include_idx = rep(TRUE,nrow(res$alpha))
-  } else
-    null_index = 0
-
+  null_index = 0
+  include_idx = rep(TRUE,nrow(res$alpha))
+  if (!is.null(res$null_index)) null_index = res$null_index
+  if (is.numeric(res$V)) include_idx = res$V > 1e-9
   # L x P binary matrix.
   status = in_CS(res$alpha,coverage)
 
   # L-list of CS positions.
   cs = lapply(1:nrow(status),function(i) which(status[i,]!=0))
   claimed_coverage = sapply(1:length(cs),
-                            function (i) sum(res$alpha[i,][cs[[i]]])) 
+                            function (i) sum(res$alpha[i,][cs[[i]]]))
   include_idx = include_idx * (lapply(cs,length) > 0)
 
   # FIXME: see issue 21
@@ -280,7 +275,7 @@ susie_get_cs = function (res, X = NULL, Xcorr = NULL, coverage = 0.95,
                 requested_coverage = coverage))
   cs = cs[include_idx]
   claimed_coverage = claimed_coverage[include_idx]
-  
+
   # Compute and filter by "purity".
   if (is.null(Xcorr) && is.null(X)) {
     names(cs) = paste0("L",which(include_idx))
@@ -319,6 +314,42 @@ susie_get_cs = function (res, X = NULL, Xcorr = NULL, coverage = 0.95,
   }
 }
 
+#' @title Get correlations between CS, using variable with maximum PIP from each CS
+#'
+#' @param X n by p matrix of values of the p variables (covariates) in
+#'   n samples. When provided, correlation between variables will be
+#'   computed and used to remove CSs whose minimum correlation among
+#'   variables is smaller than \code{min_abs_corr}.
+#'
+#' @param Xcorr p by p matrix of correlations between variables
+#'   (covariates). When provided, it will be used to remove CSs whose
+#'   minimum correlation among variables is smaller than
+#'   \code{min_abs_corr}.
+#'
+#' @keywords internal
+#'
+get_cs_correlation = function (res, X = NULL, Xcorr = NULL, max = FALSE) {
+  if (is.null(res$sets$cs) || length(res$sets$cs) == 1) return(NA)
+  if (!is.null(X) && !is.null(Xcorr))
+    stop("Only one of X or Xcorr should be specified")
+  if (is.null(Xcorr) && is.null(X))
+    stop("One of X or Xcorr must be specified")
+  if (!is.null(Xcorr) && !is_symmetric_matrix(Xcorr))
+    stop("Xcorr matrix must be symmetric")
+  # Get index for the best PIP per CS
+  max_pip_idx = sapply(res$sets$cs, function(cs) cs[which.max(res$pip[cs])])
+  if (is.null(Xcorr)) {
+    X_sub = X[,max_pip_idx]
+    cs_corr = muffled_corr(as.matrix(X_sub))
+  } else {
+    cs_corr = Xcorr[max_pip_idx, max_pip_idx]
+  }
+  if (max) {
+    cs_corr = max(abs(cs_corr[upper.tri(cs_corr)]))
+  }
+  return(cs_corr)
+}
+
 #' @rdname susie_get_methods
 #'
 #' @param prune_by_cs Whether or not to ignore single effects not in
@@ -334,7 +365,7 @@ susie_get_pip = function (res, prune_by_cs = FALSE, prior_tol = 1e-9) {
   if (inherits(res,"susie")) {
 
     # Drop null weight columns.
-    if (res$null_index > 0)
+    if (!is.null(res$null_index) && res$null_index > 0)
       res$alpha = res$alpha[,-res$null_index,drop=FALSE]
 
     # Drop the single-effects with estimated prior of zero.
@@ -481,7 +512,7 @@ susie_slim = function (res)
 susie_prune_single_effects = function (s,L = 0,V = NULL,verbose = FALSE) {
   num_effects = nrow(s$alpha)
   if (L == 0) {
-      
+
     # Filtering will be based on non-zero elements in s$V.
     if (!is.null(s$V))
       L = length(which(s$V > 0))
@@ -496,7 +527,7 @@ susie_prune_single_effects = function (s,L = 0,V = NULL,verbose = FALSE) {
     effects_rank = c(s$sets$cs_index,setdiff(1:num_effects,s$sets$cs_index))
   else
     effects_rank = 1:num_effects
-  if (verbose) 
+  if (verbose)
     warning(paste("Specified number of effects L =",L,
                   "does not match the number of effects",num_effects,
                   "in input SuSiE model. It will be",
@@ -529,3 +560,208 @@ susie_prune_single_effects = function (s,L = 0,V = NULL,verbose = FALSE) {
   s$sets = NULL
   return(s)
 }
+
+#' @title Estimate s in susie_rss model using regularized LD
+#'
+#' @description The estimated s gives information about the consistency
+#' between the z scores and LD matrix. A larger \eqn{s} means there is a
+#' strong inconsistency between z scores and LD matrix.
+#' The 'null-mle' method obtains mle of \eqn{s}
+#' under \eqn{z | R ~ N(0,(1-s)R + s I)}, \eqn{0 < s < 1}. The 'null-partialmle'
+#' method obtains mle of \eqn{s} under \eqn{U^T z | R ~ N(0,s I)}, \eqn{U} is a matrix
+#' of eigenvectors of R with 0 eigenvalues. The estimated \eqn{s} from 'null-partialmle'
+#' could be greater than 1. The 'null-pseudomle' method obtains
+#' mle of \eqn{s} under pseudolikelihood \eqn{L(s) = \prod_{j=1}^{p} p(z_j | z_{-j}, s, R)},
+#' \eqn{0 < s < 1}.
+#'
+#' @param z A p-vector of z scores.
+#'
+#' @param R A p by p symmetric, positive semidefinite correlation
+#' matrix.
+#'
+#' @param r_tol Tolerance level for eigenvalue check of positive
+#'   semidefinite matrix of R.
+#'
+#' @param method a string specifies the method to estimate \eqn{s}.
+#'
+#' @examples
+#' set.seed(1)
+#' n = 500
+#' p = 1000
+#' beta = rep(0,p)
+#' beta[1:4] = 0.01
+#' X = matrix(rnorm(n*p),nrow = n,ncol = p)
+#' X = scale(X,center = TRUE,scale = TRUE)
+#' y = drop(X %*% beta + rnorm(n))
+#' input_ss <- compute_suff_stat(X,y,standardize = TRUE)
+#' ss   <- univariate_regression(X,y)
+#' R    <- cor(X)
+#' attr(R, 'eigen') = eigen(R, symmetric = T)
+#' zhat <- with(ss,betahat/sebetahat)
+#' s = estimate_s_rss(zhat, R)
+#'
+#' @export
+#'
+estimate_s_rss = function(z, R, r_tol=1e-08, method="null-mle"){
+  if (is.null(attr(R,"eigen")))
+    attr(R,"eigen") = eigen(R,symmetric = TRUE)
+  eigenld = attr(R,"eigen")
+  if(any(eigenld$values < -r_tol)){
+    warning('The matrix R is not positive semidefinite. Negative eigenvalues are set to 0.')
+  }
+  eigenld$values[eigenld$values < r_tol] = 0
+
+  if(method == 'null-mle'){
+    negloglikelihood = function(s, z, eigenld){
+      0.5 * sum(log((1-s)*eigenld$values+s)) +
+        0.5 * sum(z * eigenld$vectors %*% ((t(eigenld$vectors) * (1/((1-s)*eigenld$values + s))) %*% z))
+    }
+    s = optim(0.5, fn=negloglikelihood, z=z, eigenld=eigenld,
+              method = 'Brent', lower=0, upper=1)$par
+  }else if(method == 'null-partialmle'){
+    colspace = which(eigenld$values > 0)
+    if(length(colspace) == length(z)){
+      s = 0
+    }else{
+      znull = crossprod(eigenld$vectors[,-colspace], z) # U2^T z
+      s = sum(znull^2)/length(znull)
+    }
+  }else if(method == 'null-pseudomle'){
+    pseudolikelihood = function(s, z, eigenld){
+      precision = eigenld$vectors %*% (t(eigenld$vectors) * (1/((1-s)*eigenld$values + s)))
+      postmean = c()
+      postvar = c()
+      for(i in 1:length(z)){
+        postmean = c(postmean, -(1/precision[i,i]) * precision[i,-i] %*% z[-i])
+        postvar = c(postvar, 1/precision[i,i])
+      }
+      -sum(dnorm(z, mean=postmean, sd = sqrt(postvar), log=T))
+    }
+    s = optim(0.5, fn=pseudolikelihood,
+              z=z, eigenld=eigenld,
+              method = 'Brent', lower=0, upper=1)$par
+  }
+  else{
+    stop('The method is not implemented.')
+  }
+  return(s)
+}
+
+#' @title Compute the distribution of z score of variant j given other z scores, and detect
+#' possible allele switch issue.
+#'
+#' @description Under the null, the rss model with regularized LD matrix is
+#' \eqn{z|R,s ~ N(0, (1-s)R + s I))}. We use a mixture of normals
+#' to model the conditional distribution of z_j given other z scores,
+#' \eqn{z_j | z_{-j}, R, s ~ \sum_{k=1}^{K} \pi_k N(-\Omega_{j,-j} z_{-j}/\Omega_{jj}, \sigma_{k}^2/\Omega_{jj})},
+#' \eqn{\Omega = ((1-s)R + s I)^{-1}}, \eqn{\sigma_1, ..., \sigma_k} is a
+#' grid of fixed positive numbers. We estimate the mixture weights \eqn{\pi}.
+#' We detect the possible allele switch issue using likelihood ratio for each variant.
+#'
+#' @param z A p-vector of z scores.
+#'
+#' @param R A p by p symmetric, positive semidefinite correlation
+#' matrix.
+#'
+#' @param r_tol Tolerance level for eigenvalue check of positive
+#' semidefinite matrix of R.
+#'
+#' @param s an estimated s from \code{estimate_s_rss}
+#'
+#' @param plot.it If \code{plot.it = TRUE}, it produces a plot with
+#'   observed z score vs the expected value. The possible allele switched
+#'   variants are labeled as red points (log LR > 2 and abs(z) > 2).
+#'
+#' @importFrom mixsqp mixsqp
+#'
+#' @examples
+#' set.seed(1)
+#' n = 500
+#' p = 1000
+#' beta = rep(0,p)
+#' beta[1:4] = 0.01
+#' X = matrix(rnorm(n*p),nrow = n,ncol = p)
+#' X = scale(X,center = TRUE,scale = TRUE)
+#' y = drop(X %*% beta + rnorm(n))
+#' ss   <- univariate_regression(X,y)
+#' R    <- cor(X)
+#' attr(R, 'eigen') = eigen(R, symmetric = T)
+#' zhat <- with(ss,betahat/sebetahat)
+#' condz = kriging_rss(zhat, R)
+#'
+#' @export
+#'
+kriging_rss = function(z, R, r_tol=1e-08,
+                       s = estimate_s_rss(z, R, r_tol, method = 'null-mle'),
+                       plot.it = TRUE){
+  if (is.null(attr(R,"eigen")))
+    attr(R,"eigen") = eigen(R,symmetric = TRUE)
+  eigenld = attr(R,"eigen")
+  if(any(eigenld$values < -r_tol)){
+    warning('The matrix R is not positive semidefinite. Negative eigenvalues are set to 0.')
+  }
+  eigenld$values[eigenld$values < r_tol] = 0
+
+  if(s > 1){
+    warning('The given s is greater than 1. We replace it with 0.8.')
+    s = 0.8
+  }
+  if(s < 0){
+    stop('The s must be non-negative.')
+  }
+
+  dinv = 1/((1-s)*eigenld$values + s)
+  dinv[is.infinite(dinv)] = 0
+  precision = eigenld$vectors %*% (t(eigenld$vectors) * dinv)
+  postmean = c()
+  postvar = c()
+  for(i in 1:length(z)){
+    postmean = c(postmean, -(1/precision[i,i]) * precision[i,-i] %*% z[-i])
+    postvar = c(postvar, 1/precision[i,i])
+  }
+  post_z = (z-postmean)/sqrt(postvar)
+
+  ## obtain grid
+  a_min = 0.8
+  if(max(post_z^2) < 1){
+    a_max = 2
+  }else{
+    a_max = 2*sqrt(max(post_z^2))
+  }
+  npoint = ceiling(log2(a_max/a_min)/log2(1.05))
+  a_grid = 1.05^((-npoint):0) * a_max
+
+  ## compute likelihood
+  sd_mtx = outer(sqrt(postvar), a_grid)
+  matrix_llik = dnorm(z - postmean, sd=sd_mtx, log=T)
+  lfactors    <- apply(matrix_llik,1,max)
+  matrix_llik <- matrix_llik - lfactors
+  ## estimate weight
+  w = mixsqp(matrix_llik, log=T, control = list(verbose=FALSE))$x
+
+  logl0mix = as.numeric(log(exp(matrix_llik) %*% w)) + lfactors
+  matrix_llik = dnorm(z + postmean, sd=sd_mtx, log=T)
+  lfactors    <- apply(matrix_llik,1,max)
+  matrix_llik <- matrix_llik - lfactors
+  logl1mix = as.numeric(log(exp(matrix_llik) %*% w)) + lfactors
+  logLRmix = logl1mix - logl0mix
+
+
+  if(plot.it){
+    plot(z, postmean, pch = 16,
+         xlab = 'observed z scores',
+         ylab = 'Expected value')
+    abline(0,1, lty=2)
+    if(any(logLRmix>2)){
+      idx = which(logLRmix > 2 & abs(z) > 2)
+      points(z[idx], postmean[idx], col = 'red', pch=16)
+    }
+  }
+
+  return(invisible(data.frame(z = z, postmean = postmean, postvar = postvar,
+                    post_z = post_z,
+                    logLR = logLRmix)))
+}
+
+
+

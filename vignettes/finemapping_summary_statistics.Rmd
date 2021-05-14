@@ -17,7 +17,7 @@ knitr::opts_chunk$set(collapse = TRUE,comment = "#",fig.width = 5,
 
 This vignette demonstrates how to use `susieR` with "summary statistics" in the context of genetic fine-mapping. 
 We use the same simulated data as in [fine mapping vignette](finemapping.html). The simulated data is expression level of a gene ($y$) in $N \approx 600$ individuals. 
-We want to identify with the genotype matrix $X_{N\times P}$ ($P=1000$) the genetic variables that causes changes in expression level. The data-set is shipped with `susieR`. It is simulated to have exactly 3 non-zero effects.
+We want to identify with the genotype matrix $X_{N\times P}$ ($P=1001$) the genetic variables that causes changes in expression level. The data-set is shipped with `susieR`. It is simulated to have exactly 3 non-zero effects.
 
 ```{r}
 library(susieR)
@@ -55,7 +55,7 @@ So the underlying causal variables are 403, 653 and 773.
 Summary statistics of genetic association studies typically contain effect size ($\hat{\beta}$ coefficient from regression), p-value and minor allele frequencies. 
 These information can be used to perform fine-mapping with given an additional input of correlation matrix between variables.
 The correlation matrix in genetics is typically referred to as LD matrix (LD for linkage disequilibrium). 
-One may use external reference panels to estimate it when this matrix cannot be obtained from samples directly. There is a potential problem using LD from reference panel, and we demonstrated it in the next section.
+One may use external reference panels to estimate it when this matrix cannot be obtained from samples directly.
 Caution that LD matrix here has to be correlation matrix $r$, not $r^2$ or $abs(r)$.
 
 `univariate_regression` function can be used to compute 
@@ -63,7 +63,6 @@ summary statistics by fitting univariate simple regression variable by variable.
 The results are $\hat{\beta}$ and $SE(\hat{\beta})$ from which z-scores can be derived. 
 Alternatively you can obtain z-scores from $\hat{\beta}$ and p-values if you are provided with those information.
 Again we focus only on results from the first data-set:
-
 
 ```{r}
 sumstats <- univariate_regression(X, Y[,1])
@@ -84,9 +83,7 @@ For starters, we assume there are at most 10 causal variables, i.e. set `L = 10`
 SuSiE regression with summary statistics is implemented as `susie_rss` function, 
 
 ```{r}
-fitted_rss <- susie_rss(z_scores, R, L = 10,
-                          estimate_residual_variance = TRUE, 
-                          estimate_prior_variance = TRUE)
+fitted_rss <- susie_rss(z_scores, R, L = 10)
 ```
 
 Using `summary` function, we can examine the posterior inclusion probability (PIP) for each variable, and the 95% credible sets. 
@@ -117,56 +114,6 @@ fitted = susie(X, Y[,1], L = 10,
                 estimate_residual_variance = TRUE, 
                 estimate_prior_variance = TRUE)
 plot(fitted$pip, fitted_rss$pip, ylim=c(0,1))
-```
-
-## Using LD from reference panel
-
-When original genotype information is not available, one may use reference panel to estimate LD matrix. If the LD pattern from the reference panel does not agree well with the original sample, it does not agree with the observed z scores neither. There could be lots of false discoveries. 
-
-We randomly generated 500 samples from $N(0,R)$ and treated them as reference panel genotype matrix `X_ref`.
-```{r echo=F}
-set.seed(1234)
-tmp = matrix(rnorm(500*1001), 500, 1001)
-eigenR = eigen(R)
-eigenR$values[eigenR$values < 1e-10] = 0
-X_ref = tmp %*% (eigenR$values * t(eigenR$vectors))
-R_ref = cor(X_ref)
-```
-
-Using susie_rss function with LD from reference panel, the model identifies 10 CSs and only one of them contains the true signal. 
-```{r}
-fitted_rss_ref <- susie_rss(z_scores, R_ref, L = 10,
-                            estimate_residual_variance = TRUE, 
-                            estimate_prior_variance = TRUE, check_z = F)
-```
-
-```{r}
-susie_plot(fitted_rss_ref, y="PIP", b=b)
-```
-
-**We recommend the following modification on the LD matrix from reference panel ($R_{ref}$),** 
-$$
-\tilde{R} = \text{cov2cor}((1-w)R_{ref}+ w zz^\intercal)),
-$$
-where z is the original summary statistics. We suggest using $w = 1/n_{ref}$, $n_{ref}$ is the sample size from the reference panel. The modified LD matrix becomes
-$$
-\tilde{R} = \text{cov2cor}(\frac{n_{ref}-1}{n_{ref}}R_{ref}+ \frac{1}{n_{ref}} zz^\intercal)) = \text{cov2cor}(\frac{1}{n_{ref}}(X_{ref}^\intercal X_{ref}+ zz^\intercal)),
-$$
-where `X_ref` is column-standardized. This modification is implemented in `susie_rss` with parameter `z_ld_weight`:
-```{r}
-fitted_rss_ref_cor <- susie_rss(z_scores, R_ref, z_ld_weight = 1/500, L = 10,
-                                estimate_residual_variance = TRUE, 
-                                estimate_prior_variance = TRUE, check_z = F)
-```
-
-```{r}
-summary(fitted_rss_ref_cor)$cs
-```
-
-The model identifies 2 CSes with 2 true signals. It misses 1 true signal, but it is a better fit than using the correlation matrix from the reference pancel directly.
-
-```{r}
-susie_plot(fitted_rss_ref_cor, y="PIP", b=b)
 ```
 
 ## Session information

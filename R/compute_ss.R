@@ -1,24 +1,29 @@
-#' @title Compute sufficient statistics for susie.
-#' 
+#' @title Compute sufficient statistics for input to \code{susie_suff_stat}
+#'
+#' @description  Computes the sufficient statistics \eqn{X'X, X'y, y'y} and \eqn{n}
+#' after centering (and possibly standardizing) the columns of \eqn{X} and centering \eqn{y}
+#' to have mean 0. We also store the column means of \eqn{X} and mean of \eqn{y}.
+#'
 #' @param X An n by p matrix of covariates.
-#' 
+#'
 #' @param y An n vector.
-#' 
+#'
 #' @param standardize Logical flag indicating whether to standardize
-#'   columns of X to unit variance prior to fitting.
-#' 
-#' @return A list of sufficient statistics.
-#' 
+#'   columns of X to unit variance prior to computing summary data
+#'
+#' @return A list of sufficient statistics (\code{XtX, Xty, yty, n}) and X_colmeans, y_mean.
+#'
 #' @importFrom methods as
 #'
 #' @examples
 #' data(N2finemapping)
-#' ss = compute_ss(N2finemapping$X, N2finemapping$Y[,1])
-#' 
+#' ss = compute_suff_stat(N2finemapping$X, N2finemapping$Y[,1])
+#'
 #' @export
-#' 
-compute_ss = function(X, y, standardize = TRUE) {
-  y = y - mean(y)
+#'
+compute_suff_stat = function(X, y, standardize = FALSE) {
+  y_mean = mean(y)
+  y = y - y_mean
   is.sparse = !is.matrix(X)
   X = set_X_attributes(as.matrix(X),center=TRUE,scale = standardize)
   X = t((t(X) - attr(X,"scaled:center"))/attr(X,"scaled:scale"))
@@ -28,5 +33,30 @@ compute_ss = function(X, y, standardize = TRUE) {
   Xty = c(y %*% X)
   n = length(y)
   yty = sum(y^2)
-  return(list(XtX = XtX,Xty = Xty,yty = yty,n = n))
+  return(list(XtX = XtX,Xty = Xty,yty = yty,n = n, y_mean=y_mean, X_colmeans = attr(X,"scaled:center")))
+}
+
+#' @title Compute sufficient statistics for input to \code{susie_suff_stat}
+#'
+#' @description This is a synonym for \code{compute_suff_stat} included for historical reasons; deprecated.
+#'
+#' @param X An n by p matrix of covariates.
+#'
+#' @param y An n vector.
+#'
+#' @param standardize Logical flag indicating whether to standardize
+#'   columns of X to unit variance prior to computing summary data.
+#'
+#' @return A list of sufficient statistics (X'X, X'y, y'y and n)
+#'
+#' @importFrom methods as
+#'
+#' @examples
+#' data(N2finemapping)
+#' ss = compute_ss(N2finemapping$X, N2finemapping$Y[,1])
+#'
+#' @export
+#'
+compute_ss = function(X, y, standardize = FALSE) {
+  compute_suff_stat(X,y,standardize)
 }
