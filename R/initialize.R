@@ -50,7 +50,7 @@ susie_init_coef = function (coef_index, coef_value, p) {
 
 # Set default susie initialization.
 init_setup = function (n, p, L, scaled_prior_variance, residual_variance,
-                       prior_weights, null_weight, varY, standardize) {
+                       prior_weights, null_weight, varY, standardize, correct_zR_discrepancy=FALSE) {
   if (!is.numeric(scaled_prior_variance) || scaled_prior_variance < 0)
     stop("Scaled prior variance should be positive number")
   if (scaled_prior_variance > 1 && standardize)
@@ -84,6 +84,14 @@ init_setup = function (n, p, L, scaled_prior_variance, residual_variance,
     s$null_index = 0
   else
     s$null_index = p
+  s$correct_zR_discrepancy = list(to_correct = correct_zR_discrepancy, 
+                                  outlier_index = vector(),
+                                  is_init = TRUE,
+                                  # in case some iterations were trapped to local
+                                  outlier_stabilize = 3,
+                                  outlier_stable_count = 0,
+                                  weight = vector("list", L))
+  s$force_iterate = TRUE
   class(s) = "susie"
   return(s)
 }

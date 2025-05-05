@@ -42,6 +42,7 @@ single_effect_regression_ss =
   #
   # but subtract max for numerical stability.
   w_weighted = exp(lpo - maxlpo)
+  w_weighted[prior_weights == 0] = 0
   weighted_sum_w = sum(w_weighted)
   alpha = w_weighted / weighted_sum_w
   post_var = (1/V + dXtX/residual_variance)^(-1) # Posterior variance.
